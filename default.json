@@ -1,0 +1,75 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Keep EXPath package dependencies in expath-pkg.xml up to date from the eXist-db public-repo",
+  "customDatasources": {
+    "exist-public-repo": {
+      "defaultRegistryUrlTemplate": "https://exist-db.org/exist/apps/public-repo/public/apps.xml?version=6.4.0",
+      "format": "json",
+      "transformTemplates": [
+        "( $app := apps[name = '{{{packageName}}}']; { 'releases': $append([{ 'version': $app.version }], [$app.older.{ 'version': version }]), 'homepage': $app.website } )"
+      ]
+    }
+  },
+  "customManagers": [
+    {
+      "description": "<dependency package=\"\u2026\" semver=\"1\"/>: a version template, bumped to the next major",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)expath-pkg\\.xml(\\.tmpl)?$/"
+      ],
+      "matchStrings": [
+        "<dependency\\s+package=\"(?<packageName>[^\"]+)\"\\s+semver=\"(?<currentValue>[^\"]+)\""
+      ],
+      "autoReplaceStringTemplate": "<dependency package=\"{{{packageName}}}\" semver=\"{{{newValue}}}\"",
+      "depTypeTemplate": "semver",
+      "datasourceTemplate": "custom.exist-public-repo",
+      "versioningTemplate": "npm"
+    },
+    {
+      "description": "<dependency package=\"\u2026\" semver-min=\"6.1\" semver-max=\"6\"/>: on a new major, raise both bounds",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)expath-pkg\\.xml(\\.tmpl)?$/"
+      ],
+      "matchStrings": [
+        "<dependency\\s+package=\"(?<packageName>[^\"]+)\"\\s+semver-min=\"[^\"]+\"\\s+semver-max=\"(?<currentValue>[^\"]+)\""
+      ],
+      "autoReplaceStringTemplate": "<dependency package=\"{{{packageName}}}\" semver-min=\"{{{newVersion}}}\" semver-max=\"{{{newValue}}}\"",
+      "depTypeTemplate": "semver-range",
+      "datasourceTemplate": "custom.exist-public-repo",
+      "versioningTemplate": "npm"
+    },
+    {
+      "description": "<dependency package=\"\u2026\" semver-min=\"1.2.3\"/>: raise the minimum to the newest release",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)expath-pkg\\.xml(\\.tmpl)?$/"
+      ],
+      "matchStrings": [
+        "<dependency\\s+package=\"(?<packageName>[^\"]+)\"\\s+semver-min=\"(?<currentValue>[^\"]+)\"\\s*/>"
+      ],
+      "autoReplaceStringTemplate": "<dependency package=\"{{{packageName}}}\" semver-min=\"{{{newValue}}}\"/>",
+      "depTypeTemplate": "semver-min",
+      "datasourceTemplate": "custom.exist-public-repo",
+      "versioningTemplate": "semver-coerced"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": [
+        "custom.exist-public-repo"
+      ],
+      "matchDepTypes": [
+        "semver",
+        "semver-range"
+      ],
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchDatasources": [
+        "custom.exist-public-repo"
+      ],
+      "commitMessageTopic": "EXPath package {{depName}}"
+    }
+  ]
+}
