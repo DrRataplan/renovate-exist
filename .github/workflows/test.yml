@@ -1,0 +1,57 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: eXist-db/public-repo
+          path: public-repo
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Build public-repo
+        working-directory: public-repo
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+        run: ant
+
+      - name: Add public-repo's dependencies
+        working-directory: public-repo/build
+        run: |
+          wget -q https://exist-db.org/exist/apps/public-repo/public/semver-xq-3.0.0.xar -O 000-semver-xq.xar
+          wget -q https://exist-db.org/exist/apps/public-repo/public/templating-1.2.1.xar -O 001-templating.xar
+
+      - name: Start eXist-db with public-repo
+        run: |
+          docker run -d -p 8080:8080 -v "$GITHUB_WORKSPACE/public-repo/build:/exist/autodeploy" \
+            --name exist duncdrum/existdb:release
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:8080/exist/apps/public-repo/ && exit 0
+            sleep 3
+          done
+          docker logs exist
+          exit 1
+
+      - run: npm ci
+      - run: npm run validate
+      - run: npm test
+
+      - if: failure()
+        run: docker logs exist

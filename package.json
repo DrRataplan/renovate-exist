@@ -1,0 +1,13 @@
+{
+  "name": "renovate-exist",
+  "private": true,
+  "description": "Renovate preset for EXPath package dependencies in eXist-db apps",
+  "type": "module",
+  "scripts": {
+    "validate": "renovate-config-validator default.json",
+    "test": "python3 test/build-packages.py build/packages && node test/run.mjs build/packages"
+  },
+  "devDependencies": {
+    "renovate": "44.140.0"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "http://e-editiones.org/roaster": ["2"],
+  "http://existsolutions.com/apps/tei-publisher-lib": ["7"],
+  "http://tei-publisher.com/library/jinks-templates": [],
+  "http://existsolutions.com/ns/jwt": [],
+  "http://www.functx.com": ["1.1.0"]
+}
