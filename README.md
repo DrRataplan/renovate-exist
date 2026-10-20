@@ -4,13 +4,16 @@ Renovate preset for eXist-db apps. Keeps the dependencies in `expath-pkg.xml` up
 
 ## Usage
 
+1. Add a `.github/renovate.json` file with the following contents:
 ```json
 {
   "extends": ["config:recommended", "github>DrRataplan/renovate-exist"]
 }
 ```
-
-Pin a release with `github>DrRataplan/renovate-exist#v1.0.0`.
+2. Pin a release with `github>DrRataplan/renovate-exist#v1.0.0`.
+3. Install the [**Mend Renovate**](https://github.com/marketplace/renovate) app from the Github Marketplace.
+4. Link your repository
+5. Get updates on your expath dependencies when the public repo updates
 
 ## What it updates
 
@@ -21,6 +24,14 @@ Pin a release with `github>DrRataplan/renovate-exist#v1.0.0`.
 | `semver-min="1.0"` | 1.1.0 is out | `semver-min="1.1.0"` |
 
 Not supported (yet): the eXist-db `processor` dependency, `version="…"`, and attributes before `package`.
+
+**The order of attributes matters**. Renovate does not process XML natively, instead it uses regexes to extract the versions and update them.
+Before enabling Renovate please make sure your expath.xml looks like this.
+
+```xml
+   <dependency package="http://example.com/my-first-package" semver="1"/>
+   <dependency package="http://example.com/my-secondpackage" semver-min="1.1.2" semver-max="1"/>
+```
 
 ## How
 
